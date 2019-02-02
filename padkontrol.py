@@ -138,6 +138,18 @@ def led(led, led_state=LED_STATE_ON):
 
     return _SYSEX_COMMON + [0x22, 0x04, led_state] + led + [0xF7]
 
+def register_input(midi_in, handler):
+    def midi_in_callback(message, data):
+        sysex_buffer = []
+        for byte in message[0]:
+            sysex_buffer.append(byte)
+
+            if (byte == 0xF7):
+                handler.process_sysex(sysex_buffer)
+                del sysex_buffer[:] # empty list
+
+    midi_in.ignore_types(False, False, False)
+    midi_in.set_callback(midi_in_callback)
 
 class PadKontrolInput:
     """Handle the PadKontrol's output.

@@ -116,19 +116,7 @@ midi_in, _ = open_midiinput(
     client_name="padkontrol",
     port_name="MIDI In")
 
-pk_print = PadKontrolPrint()
-
-def midi_in_callback(message, data):
-    sysex_buffer = []
-    for byte in message[0]:
-        sysex_buffer.append(byte)
-
-        if (byte == 0xF7):
-            pk_print.process_sysex(sysex_buffer)
-            del sysex_buffer[:] # empty list
-
-midi_in.ignore_types(False, False, False)
-midi_in.set_callback(midi_in_callback)
+pk.register_input(midi_in, PadKontrolPrint())
 
 input('Press enter to exit')
 
