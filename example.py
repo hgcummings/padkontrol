@@ -12,7 +12,6 @@ INPUT_MIDI_PORT = 1
 
 midi_out, _ = open_midioutput(
     OUTPUT_MIDI_PORT,
-    api=rtmidi.API_UNIX_JACK,
     client_name="padkontrol",
     port_name="MIDI Out")
 
@@ -114,7 +113,6 @@ raw_input('Press enter to demonstrate input handling (then enter again to exit t
 
 midi_in, _ = open_midiinput(
     INPUT_MIDI_PORT,
-    api=rtmidi.API_UNIX_JACK,
     client_name="padkontrol",
     port_name="MIDI In")
 
