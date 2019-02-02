@@ -65,7 +65,7 @@ def ensure_sysex(value):
     value -- either a string (will be converted) or a list (will be returned
              unmodified).
     """
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         return string_to_sysex(value)
     else:
         return value
@@ -94,9 +94,9 @@ def light_group(led, lights):
 
     group = [0 for i in range(5)]
 
-    for light, value in lights.items():
+    for light, value in list(lights.items()):
         if value:
-            group_index = light / 7
+            group_index = light // 7
             remainder = light % 7
             group[group_index] += int(math.pow(2, remainder))
 

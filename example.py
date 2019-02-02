@@ -22,73 +22,73 @@ def send_sysex(sysex):
 
 class PadKontrolPrint(pk.PadKontrolInput):
     def on_pad_down(self, pad, velocity):
-        print 'pad #%d down, velocity %d/127' % (pad, velocity)
+        print('pad #%d down, velocity %d/127' % (pad, velocity))
 
     def on_pad_up(self, pad):
-        print 'pad #%d up' % pad
+        print('pad #%d up' % pad)
 
     def on_button_down(self, button):
         if button == pk.BUTTON_FLAM:
-            print 'flam button down'
+            print('flam button down')
         else:
-            print 'button #%d down' % button
+            print('button #%d down' % button)
 
     def on_button_up(self, button):
         if button == pk.BUTTON_MESSAGE:
-            print 'message button up'
+            print('message button up')
         else:
-            print 'button #%d up' % button
+            print('button #%d up' % button)
 
     def on_knob(self, knob, value):
-        print 'knob #%d value = %d' % (knob, value)
+        print('knob #%d value = %d' % (knob, value))
 
     def on_rotary_left(self):
-        print 'rotary turned left'
+        print('rotary turned left')
 
     def on_rotary_right(self):
-        print 'rotary turned right'
+        print('rotary turned right')
 
     def on_x_y(self, x, y):
-        print 'x/y pad (x = %d, y = %d)' % (x, y)
+        print('x/y pad (x = %d, y = %d)' % (x, y))
 
 
 send_sysex(pk.SYSEX_NATIVE_MODE_OFF)
 
-raw_input('Press enter to enable native mode.')
+input('Press enter to enable native mode.')
 
 send_sysex(pk.SYSEX_NATIVE_MODE_ON) # must be sent first
 send_sysex(pk.SYSEX_NATIVE_MODE_ENABLE_OUTPUT)
 send_sysex(pk.SYSEX_NATIVE_MODE_INIT) # must be sent after SYSEX_NATIVE_MODE_ON
 send_sysex(pk.SYSEX_NATIVE_MODE_TEST) # displays 'YES' on the LED
 
-raw_input('Press enter to display blinking numbers.')
+input('Press enter to display blinking numbers.')
 
 send_sysex(pk.led('123', pk.LED_STATE_BLINK))
 
-raw_input('Press enter to display a greeting.')
+input('Press enter to display a greeting.')
 
 welcome_message = pk.string_to_sysex('Hi ')
 
 send_sysex(pk.led(welcome_message))
 
-raw_input('Press enter to see the PROG CHANGE button flash once.')
+input('Press enter to see the PROG CHANGE button flash once.')
 
 send_sysex(pk.light_flash(pk.BUTTON_PROG_CHANGE, 0.5))
 
-raw_input('Press enter to see pad #4 blink.')
+input('Press enter to see pad #4 blink.')
 
 send_sysex(pk.light(4, pk.LIGHT_STATE_BLINK))
 
-raw_input('Press enter to light up the KNOB 1 ASSIGN button.')
+input('Press enter to light up the KNOB 1 ASSIGN button.')
 
 send_sysex(pk.light(pk.BUTTON_KNOB_1_ASSIGN, True))
 
-raw_input('Press enter to turn off pad #4 and the KNOB 1 ASSIGN lights.')
+input('Press enter to turn off pad #4 and the KNOB 1 ASSIGN lights.')
 
 send_sysex(pk.light(4, False))
 send_sysex(pk.light(pk.BUTTON_KNOB_1_ASSIGN, pk.LIGHT_STATE_OFF))
 
-raw_input('Press enter to turn on multiple lights with one message.')
+input('Press enter to turn on multiple lights with one message.')
 
 send_sysex(pk.light_group(welcome_message, {
         0: True,
@@ -109,7 +109,7 @@ send_sysex(pk.light_group(welcome_message, {
         pk.BUTTON_PORT: True
     }))
 
-raw_input('Press enter to demonstrate input handling (then enter again to exit this example).')
+input('Press enter to demonstrate input handling (then enter again to exit this example).')
 
 midi_in, _ = open_midiinput(
     INPUT_MIDI_PORT,
@@ -130,7 +130,7 @@ def midi_in_callback(message, data):
 midi_in.ignore_types(False, False, False)
 midi_in.set_callback(midi_in_callback)
 
-raw_input('Press enter to exit')
+input('Press enter to exit')
 
 send_sysex(pk.SYSEX_NATIVE_MODE_OFF)
 
