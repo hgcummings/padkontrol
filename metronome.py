@@ -10,8 +10,6 @@ GM_OUT_MIDI_PORT = 0
 PK_IN_MIDI_PORT = 1
 PK_OUT_MIDI_PORT = 2
 
-playing = True
-
 gm_midi_out, _ = open_midioutput(GM_OUT_MIDI_PORT)
 pk_midi_out, _ = open_midioutput(PK_OUT_MIDI_PORT)
 pk_midi_in, _ = open_midiinput(PK_IN_MIDI_PORT)
@@ -25,9 +23,7 @@ class Metronome:
 
     def set_tempo(self, tempo):
         self.tempo = tempo
-        self.next_tick -= self.tick_length
         self.tick_length = 60000000000 // tempo
-        self.next_tick += self.tick_length
 
     def await_tick(self):
         while time.monotonic_ns() < metronome.next_tick:
@@ -40,13 +36,6 @@ def send_sysex(sysex):
 
 def display_tempo():
     send_sysex(pk.led(pk.string_to_sysex('%3d' % metronome.tempo)))
-
-send_sysex(pk.SYSEX_NATIVE_MODE_ON)
-send_sysex(pk.SYSEX_NATIVE_MODE_ENABLE_OUTPUT)
-send_sysex(pk.SYSEX_NATIVE_MODE_INIT)
-
-metronome = Metronome(120)
-display_tempo()
 
 class PadKontrolHandler(pk.PadKontrolInput):
     def on_button_down(self, button):
@@ -64,7 +53,14 @@ class PadKontrolHandler(pk.PadKontrolInput):
     def on_invalid_sysex(self, sysex):
         pass
 
+send_sysex(pk.SYSEX_NATIVE_MODE_ON)
+send_sysex(pk.SYSEX_NATIVE_MODE_ENABLE_OUTPUT)
+send_sysex(pk.SYSEX_NATIVE_MODE_INIT)
+
 pk.register_input(pk_midi_in, PadKontrolHandler())
+
+metronome = Metronome(120)
+display_tempo()
 
 tick = 0
 while metronome.playing:
