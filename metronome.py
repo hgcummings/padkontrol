@@ -15,18 +15,23 @@ pk_midi_out, _ = open_midioutput(PK_OUT_MIDI_PORT)
 pk_midi_in, _ = open_midiinput(PK_IN_MIDI_PORT)
 
 class Metronome:
-    def __init__(self, tempo):
+    def __init__(self):
         self.next_tick = time.monotonic_ns()
         self.tick_length = 0
-        self.set_tempo(tempo)
         self.playing = True
+        self.paused = False
 
     def set_tempo(self, tempo):
         self.tempo = tempo
         self.tick_length = 60000000000 // tempo
 
+    def toggle_pause(self):
+        if (self.paused):
+            self.next_tick = time.monotonic_ns()
+        self.paused = not self.paused
+
     def await_tick(self):
-        while time.monotonic_ns() < metronome.next_tick:
+        while self.paused or time.monotonic_ns() < self.next_tick:
             time.sleep(0.001)
 
         self.next_tick += self.tick_length
@@ -34,21 +39,29 @@ class Metronome:
 def send_sysex(sysex):
     pk_midi_out.send_message(sysex)
 
-def display_tempo():
-    send_sysex(pk.led(pk.string_to_sysex('%3d' % metronome.tempo)))
+def set_tempo(tempo):
+    metronome.set_tempo(tempo)
+    send_sysex(pk.led(pk.string_to_sysex('%3d' % tempo)))
+
+def toggle_pause():
+    metronome.toggle_pause()
+    if metronome.paused:
+        send_sysex(pk.light(pk.BUTTON_HOLD, pk.LIGHT_STATE_ON))
+    else:
+        send_sysex(pk.light(pk.BUTTON_HOLD, pk.LIGHT_STATE_OFF))
 
 class PadKontrolHandler(pk.PadKontrolInput):
     def on_button_down(self, button):
         if button == pk.BUTTON_PROG_CHANGE:
             metronome.playing = False
+        elif button == pk.BUTTON_HOLD:
+            toggle_pause()
 
     def on_rotary_left(self):
-        metronome.set_tempo(metronome.tempo - 1)
-        display_tempo()
+        set_tempo(metronome.tempo - 1)
 
     def on_rotary_right(self):
-        metronome.set_tempo(metronome.tempo + 1)
-        display_tempo()
+        set_tempo(metronome.tempo + 1)
 
     def on_invalid_sysex(self, sysex):
         pass
@@ -59,8 +72,8 @@ send_sysex(pk.SYSEX_NATIVE_MODE_INIT)
 
 pk.register_input(pk_midi_in, PadKontrolHandler())
 
-metronome = Metronome(120)
-display_tempo()
+metronome = Metronome()
+set_tempo(120)
 
 tick = 0
 while metronome.playing:
